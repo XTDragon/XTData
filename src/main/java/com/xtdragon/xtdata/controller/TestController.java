@@ -21,6 +21,7 @@ public class TestController {
     @PostMapping("/user/login")
     public CommonResult login() {
         System.out.println();
+
         System.out.println("postuser");
         return CommonResult.success("/index", "cheng");
     }
