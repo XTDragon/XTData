@@ -15,6 +15,7 @@ public class TestController {
     @RequestMapping("/")
     public String helloWorld() {
 
+
         System.out.println("HelloWorld");
         return "HelloWorld";
     }
