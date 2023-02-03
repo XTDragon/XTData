@@ -25,7 +25,7 @@ public class FileController {
 
     @RequestMapping(value = "/downloadFile/{fileName}", method = RequestMethod.GET)
     public void getFile(HttpServletResponse response, @PathVariable("fileName") String fileName){
-        File file = new File(filePath +'/'+ fileName);
+        File file = new File(filePath + "//downloadFile//" + fileName);
         System.out.println(file);
         if(!file.exists()){
             System.out.println("未找到此文件");
