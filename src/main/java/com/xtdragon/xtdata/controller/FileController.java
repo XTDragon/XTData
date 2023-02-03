@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Controller
+@RequestMapping(value = "api")
 public class FileController {
 	
 	@Value("${filePath}")
