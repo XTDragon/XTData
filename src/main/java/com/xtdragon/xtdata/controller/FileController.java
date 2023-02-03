@@ -28,7 +28,8 @@ public class FileController {
         File file = new File(filePath +'/'+ fileName);
         System.out.println(file);
         if(!file.exists()){
-           return;
+            System.out.println("未找到此文件");
+            return;
         }
         response.reset();
         response.setCharacterEncoding("utf-8");
