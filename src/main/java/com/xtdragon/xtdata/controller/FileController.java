@@ -1,20 +1,10 @@
 package com.xtdragon.xtdata.controller;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Controller
 //@RequestMapping(value = "api")
@@ -36,6 +26,9 @@ public class FileController {
         response.setCharacterEncoding("utf-8");
         response.setContentLength((int) file.length());
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
+//在方法上添加跨域注解@CrossOrigin
+//然后设置如下响应头，其中星号可以换成具体的域名
+        response.addHeader("Access-Control-Allow-Origin","*");
 
         try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
             byte[] buff = new byte[2048];
