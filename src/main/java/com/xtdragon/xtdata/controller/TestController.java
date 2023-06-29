@@ -1,10 +1,8 @@
 package com.xtdragon.xtdata.controller;
 
+import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.service.PoetryService;
-import com.xtdragon.xtdata.utils.CommonResult;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

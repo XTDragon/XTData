@@ -1,4 +1,4 @@
-package com.xtdragon.xtdata.utils;
+package com.xtdragon.xtdata.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +15,6 @@ public class CommonResult<T> {
     private long code;
     private String message;
     private T data;
-
 
     /**
      * 成功返回结果

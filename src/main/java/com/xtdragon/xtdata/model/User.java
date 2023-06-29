@@ -3,7 +3,7 @@ package com.xtdragon.xtdata.model;
 import lombok.Data;
 
 @Data
-public class user {
+public class User {
     String name;
     String password;
 }
