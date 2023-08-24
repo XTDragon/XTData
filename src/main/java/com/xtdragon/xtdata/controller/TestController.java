@@ -13,7 +13,7 @@ public class TestController {
     @RequestMapping("/")
     public String helloWorld() {
         System.out.println("HelloWorld");
-        return "HelloWorld";
+        return "<h1>HelloWorld</h1>";
     }
 
     @PostMapping("/user/login")
