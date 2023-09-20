@@ -1,5 +1,6 @@
 package com.xtdragon.xtdata.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ public class BlogController {
 
 
     @RequestMapping("/get/bloglist")
+    @SaCheckLogin
     public CommonResult getBlogList(){
 //        System.out.println(blogService.list());
         return CommonResult.success(blogService.list());
