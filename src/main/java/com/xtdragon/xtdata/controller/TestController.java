@@ -16,7 +16,7 @@ public class TestController {
         return "<h1>HelloWorld</h1>";
     }
 
-    @PostMapping("/user/login")
+//    @PostMapping("/user/login")
     public CommonResult login() {
         System.out.println();
 
@@ -24,7 +24,7 @@ public class TestController {
         return CommonResult.success("/index", "cheng");
     }
 
-    @GetMapping("/user/get")
+//    @GetMapping("/user/get")
     public String userGet() {
         System.out.println("HelloWorld");
         return "/index";
