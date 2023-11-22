@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 
 @Controller
 //@RequestMapping(value = "api")
@@ -30,16 +31,19 @@ public class FileController {
     GameFileMapper gameFileMapper;
 
     @ResponseBody
-    @RequestMapping(value = "/downLoadFile/{fileName}", method = RequestMethod.GET)
-    public void downLoadFile(HttpServletResponse response, @PathVariable("fileName") String fileName) throws IOException {
-        QueryWrapper<FCGameFile> queryWrapper = new QueryWrapper();
-        FCGameFile fcGameFile = gameFileMapper.selectOne(queryWrapper.eq("game_name", fileName));
+    @RequestMapping(value = "/downLoadFile/{id}", method = RequestMethod.GET)
+    public void downLoadFile(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
+        System.out.println(id);
+//        id= URLEncoder.encode(id,"ISO-8859-1");
+
+//        QueryWrapper<FCGameFile> queryWrapper = new QueryWrapper();
+        FCGameFile fcGameFile = gameFileMapper.selectById(id);
 
         response.reset();
         response.setCharacterEncoding("utf-8");
-        response.setContentLength((int) fcGameFile.getGameSize());
+//        response.setContentLength((int) fcGameFile.getGameSize());
         /**一定要设置成xlsx格式*/
-        response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+        response.setHeader("Content-Disposition", "attachment;filename=" + fcGameFile.getGameName());
         /**创建一个输出流*/
         ServletOutputStream outputStream = response.getOutputStream();
 
@@ -86,13 +90,14 @@ public class FileController {
     @ResponseBody
     @RequestMapping(value = "/Search", method = RequestMethod.GET)
     public CommonResult SearchGame(String input) {
-        if (input.equals("")){
+        if (input.equals("")) {
             IPage<FCGameFile> gameIPage = gameFileMapper.selectPage(new Page<>(), null);
             return CommonResult.success(gameIPage.getRecords());
         }
-        IPage<FCGameFile> gameIPage = gameFileMapper.selectPage(new Page<>(), new QueryWrapper<FCGameFile>().eq("game_name",input));
+        IPage<FCGameFile> gameIPage = gameFileMapper.selectPage(new Page<>(), new QueryWrapper<FCGameFile>().eq("game_name", input));
         return CommonResult.success(gameIPage.getRecords());
     }
+
     @RequestMapping(value = "/uploadGame", method = RequestMethod.GET)
     public void uploadFile() {
 //      File file = new File(filePath + '/' + fileName);

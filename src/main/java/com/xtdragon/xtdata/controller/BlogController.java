@@ -16,7 +16,7 @@ public class BlogController {
 
 
     @RequestMapping("/get/bloglist")
-    @SaCheckLogin
+//    @SaCheckLogin
     public CommonResult getBlogList(){
 //        System.out.println(blogService.list());
         return CommonResult.success(blogService.list());
