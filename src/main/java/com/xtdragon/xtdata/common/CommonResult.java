@@ -22,7 +22,7 @@ public class CommonResult<T> {
      * @param data 获取的数据
      */
     public static <T> CommonResult<T> success(T data) {
-        return new CommonResult<T>(SUCCESS.getCode(), SUCCESS.getMessage(), data);
+        return new CommonResult<>(SUCCESS.getCode(), SUCCESS.getMessage(), data);
     }
 
     /**
@@ -32,7 +32,7 @@ public class CommonResult<T> {
      * @param message 提示信息
      */
     public static <T> CommonResult<T> success(T data, String message) {
-        return new CommonResult<T>(SUCCESS.getCode(), message, data);
+        return new CommonResult<>(SUCCESS.getCode(), message, data);
     }
 
     /**
@@ -40,7 +40,7 @@ public class CommonResult<T> {
      *
      */
     public static <T> CommonResult<T> failed() {
-        return new CommonResult<T>(FAILED.getCode(), FAILED.getMessage(), null);
+        return new CommonResult<>(FAILED.getCode(), FAILED.getMessage(), null);
     }
 
     /**
@@ -49,7 +49,7 @@ public class CommonResult<T> {
      * @param message   错误信息
      */
     public static <T> CommonResult<T> failed(String message) {
-        return new CommonResult<T>(FAILED.getCode(), message, null);
+        return new CommonResult<>(FAILED.getCode(), message, null);
     }
 
 }

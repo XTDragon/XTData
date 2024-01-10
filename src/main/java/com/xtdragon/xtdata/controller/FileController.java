@@ -4,34 +4,43 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xtdragon.xtdata.common.CommonResult;
+import com.xtdragon.xtdata.dao.BlogMapper;
 import com.xtdragon.xtdata.dao.GameFileMapper;
+import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.model.FCGameFile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
+import java.util.Objects;
 
-@Controller
+@RestController
 //@RequestMapping(value = "api")
 public class FileController {
 
     @Value("${filePath}")
     private String filePath;
 
+    final GameFileMapper gameFileMapper;
 
-    @Autowired
-    GameFileMapper gameFileMapper;
+    final BlogMapper blogMapper;
 
-    @ResponseBody
-    @RequestMapping(value = "/downLoadFile/{id}", method = RequestMethod.GET)
+    public FileController(BlogMapper blogMapper, GameFileMapper gameFileMapper) {
+        this.blogMapper = blogMapper;
+        this.gameFileMapper = gameFileMapper;
+    }
+
+
+    @RequestMapping(value = "/downLoadFile/{id}")
     public void downLoadFile(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         System.out.println(id);
 //        id= URLEncoder.encode(id,"ISO-8859-1");
@@ -52,7 +61,7 @@ public class FileController {
         outputStream.close();
     }
 
-    @RequestMapping(value = "/downLoadFile2/{fileName}", method = RequestMethod.GET)
+    @RequestMapping(value = "/downLoadFile2/{fileName}")
     public void upLoadFile(HttpServletResponse response, @PathVariable("fileName") String fileName) {
 //        File file = new File(filePath + '/' + fileName);
         File file = new File(filePath + "//downloadFile//" + fileName);
@@ -75,19 +84,18 @@ public class FileController {
                 os.flush();
             }
         } catch (IOException e) {
-            return;
+            e.printStackTrace();
         }
-        return;
     }
 
-    @ResponseBody
+
     @RequestMapping(value = "/GameList", method = RequestMethod.GET)
     public CommonResult getGameList() {
         IPage<FCGameFile> gameIPage = gameFileMapper.selectPage(new Page<>(), null);
         return CommonResult.success(gameIPage.getRecords());
     }
 
-    @ResponseBody
+
     @RequestMapping(value = "/Search", method = RequestMethod.GET)
     public CommonResult SearchGame(String input) {
         if (input.equals("")) {
@@ -98,7 +106,7 @@ public class FileController {
         return CommonResult.success(gameIPage.getRecords());
     }
 
-    @RequestMapping(value = "/uploadGame", method = RequestMethod.GET)
+    @RequestMapping(value = "/uploadGame")
     public void uploadFile() {
 //      File file = new File(filePath + '/' + fileName);
         File file = new File("D:\\JavaProject\\jsnes-master\\roms");
@@ -111,32 +119,79 @@ public class FileController {
         FCGameFile game = new FCGameFile();
         if (file.isDirectory()) {
             File[] list = file.listFiles();
-            for (int i = 0; i < list.length; i++) {
-                reFile(list[i]);
+            if (list != null) {
+                for (File value : list) {
+                    reFile(value);
+                }
             }
         } else if (file.isFile()) {
 
-            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
+            try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(file.toPath()));) {
                 byte[] buff = new byte[2048];
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
-                int i = 0;
+                int i;
                 while ((i = bis.read(buff)) != -1) {
                     os.write(buff, 0, i);
                 }
                 os.close();
-
                 game.setGameFile(os.toByteArray());
                 game.setGameName(file.getName());
                 game.setGameSize(os.toByteArray().length);
-
                 gameFileMapper.insert(game);
             } catch (Exception e) {
                 e.printStackTrace();
-                return;
             }
-            return;
         }
-        return;
     }
 
+
+    @Scheduled(cron = "0 */10 * * * *")
+    @RequestMapping(value = "/docAutoSynced")
+    public void documentAutoSynced() {
+        String path = "C:\\Users\\gtja_1\\OneDrive\\文档";
+        File docDir = new File(path);
+        try {
+            for (File file : Objects.requireNonNull(docDir.listFiles())) {
+                Blog blog = blogMapper.selectOne(new QueryWrapper<Blog>().eq("title", file.getName().substring(0, file.getName().lastIndexOf("."))));
+                if (blog != null) {
+                    Date lastModifiedTime = new Date(file.lastModified());
+                    if (blog.getLastModifiedTime().getTime() < lastModifiedTime.getTime()) {
+                        BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                        Date creationTime = new Date(basicFileAttributes.creationTime().toMillis());
+                        StringBuilder result = new StringBuilder();
+                        // 构造一个BufferedReader类来读取文件
+                        BufferedReader br = new BufferedReader(new FileReader(file));
+                        String string = null;
+                        // 使用readLine方法，一次读一行
+                        while ((string = br.readLine()) != null) {
+                            result.append(System.lineSeparator()).append(string);
+                        }
+                        br.close();
+                        String fileName = file.getName();
+                        Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
+
+                        blogMapper.update(newblog, new QueryWrapper<Blog>().eq("id", blog.getId()));
+                    }
+                } else {
+                    Date lastModifiedTime = new Date(file.lastModified());
+                    BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                    Date creationTime = new Date(basicFileAttributes.creationTime().toMillis());
+                    StringBuilder result = new StringBuilder();
+                    // 构造一个BufferedReader类来读取文件
+                    BufferedReader br = new BufferedReader(new FileReader(file));
+                    String string = null;
+                    // 使用readLine方法，一次读一行
+                    while ((string = br.readLine()) != null) {
+                        result.append(System.lineSeparator()).append(string);
+                    }
+                    br.close();
+                    String fileName = file.getName();
+                    Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
+                    blogMapper.insert(newblog);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

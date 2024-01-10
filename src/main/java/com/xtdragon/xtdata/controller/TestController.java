@@ -10,12 +10,6 @@ public class TestController {
     @Autowired
     PoetryService poetryService;
 
-    @Autowired
-    Flow_qhoa_gsfwMapper flow_qhoa_gsfwMapper;
-
-    @Autowired
-    Flow_qhoa_gsfw_bakMapper flowQhoaGsfwBakMapper;
-
     @RequestMapping("/")
     public String helloWorld() {
         System.out.println("HelloWorld");
@@ -24,8 +18,6 @@ public class TestController {
 
     //    @PostMapping("/user/login")
     public CommonResult login() {
-        System.out.println();
-
         System.out.println("postuser");
         return CommonResult.success("/index", "cheng");
     }
@@ -35,7 +27,6 @@ public class TestController {
         System.out.println("HelloWorld");
         return "/index";
     }
-
 
     @RequestMapping("/test")
     public String test() {
