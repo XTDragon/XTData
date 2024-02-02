@@ -1,7 +1,6 @@
 package com.xtdragon.xtdata.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -18,6 +17,8 @@ public class Blog {
     private Integer id;
 
     private String imgUrl;
+
+    private byte[]  imgFile;
 
     private String title;
 

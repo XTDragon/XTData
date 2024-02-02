@@ -9,11 +9,14 @@ import com.xtdragon.xtdata.dao.GameFileMapper;
 import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.model.FCGameFile;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -30,11 +33,14 @@ public class FileController {
     @Value("${filePath}")
     private String filePath;
 
+    final   RestTemplate restTemplate;
+
     final GameFileMapper gameFileMapper;
 
     final BlogMapper blogMapper;
 
-    public FileController(BlogMapper blogMapper, GameFileMapper gameFileMapper) {
+    public FileController(RestTemplate restTemplate, BlogMapper blogMapper, GameFileMapper gameFileMapper) {
+        this.restTemplate = restTemplate;
         this.blogMapper = blogMapper;
         this.gameFileMapper = gameFileMapper;
     }
@@ -144,54 +150,4 @@ public class FileController {
         }
     }
 
-
-    @Scheduled(cron = "0 */10 * * * *")
-    @RequestMapping(value = "/docAutoSynced")
-    public void documentAutoSynced() {
-        String path = "C:\\Users\\gtja_1\\OneDrive\\文档";
-        File docDir = new File(path);
-        try {
-            for (File file : Objects.requireNonNull(docDir.listFiles())) {
-                Blog blog = blogMapper.selectOne(new QueryWrapper<Blog>().eq("title", file.getName().substring(0, file.getName().lastIndexOf("."))));
-                if (blog != null) {
-                    Date lastModifiedTime = new Date(file.lastModified());
-                    if (blog.getLastModifiedTime().getTime() < lastModifiedTime.getTime()) {
-                        BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-                        Date creationTime = new Date(basicFileAttributes.creationTime().toMillis());
-                        StringBuilder result = new StringBuilder();
-                        // 构造一个BufferedReader类来读取文件
-                        BufferedReader br = new BufferedReader(new FileReader(file));
-                        String string = null;
-                        // 使用readLine方法，一次读一行
-                        while ((string = br.readLine()) != null) {
-                            result.append(System.lineSeparator()).append(string);
-                        }
-                        br.close();
-                        String fileName = file.getName();
-                        Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
-
-                        blogMapper.update(newblog, new QueryWrapper<Blog>().eq("id", blog.getId()));
-                    }
-                } else {
-                    Date lastModifiedTime = new Date(file.lastModified());
-                    BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-                    Date creationTime = new Date(basicFileAttributes.creationTime().toMillis());
-                    StringBuilder result = new StringBuilder();
-                    // 构造一个BufferedReader类来读取文件
-                    BufferedReader br = new BufferedReader(new FileReader(file));
-                    String string = null;
-                    // 使用readLine方法，一次读一行
-                    while ((string = br.readLine()) != null) {
-                        result.append(System.lineSeparator()).append(string);
-                    }
-                    br.close();
-                    String fileName = file.getName();
-                    Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
-                    blogMapper.insert(newblog);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
