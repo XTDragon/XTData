@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+# nginx-proxy-manager的配置项
+   npm:
+   image: 'jc21/nginx-proxy-manager:latest'
+   restart: always
+   ports:
+   - '80:80'
+   - '81:81'
+   - '443:443'
+   volumes:
+   - ./npm/data:/data
+   - ./npm/letsencrypt:/etc/letsencrypt
+wordpress:
+   image: wordpress
+   restart: always
+   ports:
+   - 8080:80
+   environment:
+   WORDPRESS_DB_HOST: mysql
+   WORDPRESS_DB_USER: username
+   WORDPRESS_DB_PASSWORD: password
+   WORDPRESS_DB_NAME: wordpress
+   volumes:
+   - ./wordpress:/var/www/html
+
+mysql:
+   image: mysql:5.7
+   restart: always
+   environment:
+   MYSQL_DATABASE: wordpress
+   MYSQL_USER: username
+   MYSQL_PASSWORD: password
+   MYSQL_RANDOM_ROOT_PASSWORD: '1'
+   volumes:
+   - ./mysql:/var/lib/mysql

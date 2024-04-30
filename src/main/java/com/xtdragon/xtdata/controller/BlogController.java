@@ -1,18 +1,18 @@
 package com.xtdragon.xtdata.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mysql.cj.util.DataTypeUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xtdragon.xtdata.common.CommonPage;
 import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.dao.BlogMapper;
 import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.service.BlogService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
@@ -22,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @RestController
 public class BlogController {
 
@@ -32,6 +34,7 @@ public class BlogController {
     final RestTemplate restTemplate;
 
     final BlogMapper blogMapper;
+
     public BlogController(BlogService blogService, RestTemplate restTemplate, BlogMapper blogMapper) {
         this.blogService = blogService;
         this.restTemplate = restTemplate;
@@ -39,12 +42,44 @@ public class BlogController {
     }
 
 
-    @RequestMapping("/get/bloglist")
+    @RequestMapping("/getbloglist")
 //    @SaCheckLogin
     public CommonResult getBlogList() {
-        blogService.list();
+        List<Blog> list = blogService.list();
+        return CommonResult.success(blogService.list(new QueryWrapper<Blog>().eq("enable", true)));
+    }
+
+
+    @RequestMapping("/getPageBlogList")
+//    @SaCheckLogin
+    public CommonResult getPageBlogList(@RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                        @RequestParam(value = "currentPage", defaultValue = "1") Integer currentPage) {
+        CommonPage<Blog> blogCommonPage= CommonPage.reset(
+                blogService.page(new Page<>(currentPage, pageSize), new QueryWrapper<Blog>().eq("enable", true))
+        );
+        return CommonResult.success(blogCommonPage);
+    }
+
+
+    @RequestMapping("/getallblog")
+//    @SaCheckLogin
+    public CommonResult getAllBlog() {
         return CommonResult.success(blogService.list());
     }
+
+    @RequestMapping("/updateBlog")
+//    @SaCheckLogin
+    public CommonResult updateBlog(@RequestBody Blog blog) {
+        log.info(blog.toString());
+        return CommonResult.success(blogService.updateById(blog));
+    }
+
+//    @RequestMapping("/get/Img/{id}")
+////    @SaCheckLogin
+//    public byte[] getBlogImg(@PathVariable String id) {
+//        return blogService.getById(id).getImgFile();
+//    }
+
 
     @RequestMapping("/blog/{id}")
     public CommonResult getBlogById(@PathVariable String id) {
@@ -55,7 +90,7 @@ public class BlogController {
         return CommonResult.success(blogService.getById(id));
     }
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     @RequestMapping(value = "/docAutoSynced")
     public void documentAutoSynced() {
         String path = "C:\\Users\\gtja_1\\OneDrive\\文档";
@@ -95,18 +130,18 @@ public class BlogController {
                         result.append(System.lineSeparator()).append(string);
                     }
                     br.close();
-                    ResponseEntity<String> response = restTemplate.exchange("https://moey.cn/wallpaper/?type=josn&form=level", HttpMethod.GET,null,String.class);
+                    ResponseEntity<String> response = restTemplate.exchange("https://moey.cn/wallpaper/?type=josn&form=level", HttpMethod.GET, null, String.class);
                     String fileName = file.getName();
                     Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
                     newblog.setImgUrl(response.getBody());
-                    ResponseEntity<Resource>  imgFile = restTemplate.exchange(newblog.getImgUrl(), HttpMethod.GET, null, Resource.class);
+
+                    ResponseEntity<Resource> imgFile = restTemplate.exchange(newblog.getImgUrl(), HttpMethod.GET, null, Resource.class);
 //                    int read = imgFile.getBody().getInputStream().read();
-
-
-
-                    newblog.setImgFile(imgFile.getBody().getInputStream().readAllBytes());
+                    String base64TypeImg = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imgFile.getBody().getInputStream().readAllBytes());
+                    newblog.setImgFile(base64TypeImg);
 //                  System.out.println(response);
                     blogMapper.insert(newblog);
+                    log.info("有blog新增：" + newblog);
                 }
             }
         } catch (Exception e) {

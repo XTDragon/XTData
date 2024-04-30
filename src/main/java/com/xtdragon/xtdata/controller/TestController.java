@@ -1,52 +1,47 @@
 package com.xtdragon.xtdata.controller;
 
+import cn.hutool.core.net.URLEncoder;
 import com.xtdragon.xtdata.common.CommonResult;
-import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.service.PoetryService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
+@Slf4j
 @RestController
 public class TestController {
-    @Autowired
-    PoetryService poetryService;
+
+    @Value("${xtdata.file.directory}")
+    String fileDirectory;
 
     @Autowired
-    XwikiSchedule xwikiSchedule;
+    PoetryService poetryService;
 
     @Autowired
     RestTemplate restTemplate;
 
     @RequestMapping("/")
     public String helloWorld() {
-        List<Blog> list=new ArrayList<>();
-        Blog blog=new Blog();
-        blog.setImgUrl("null");
-        System.out.println(blog.getImgUrl());
         System.out.println("HelloWorld");
         return "<h1>HelloWorld</h1>";
     }
@@ -89,9 +84,67 @@ public class TestController {
 
     }
 
-    @RequestMapping("/test")
-    public void testPush() {
-        xwikiSchedule.pushPagefromDir("","/xwiki","");
-    }
 
+    /**
+     * 获取视频流
+     * @param response
+     * @return
+     * @author xWang
+     * @Date 2020-05-20
+     */
+    @RequestMapping("/getVideo")
+    public void getVideo(HttpServletRequest request, HttpServletResponse response,@RequestParam String fileName) {
+        String fileUrl = fileDirectory+"/video/"+fileName;
+        //String fileName="C:\\Users\\gtja_1\\Desktop\\少年派\\少年派·第六期2023年11月2日.mp4";
+        //视频资源存储信息
+        response.reset();
+        //获取从那个字节开始读取文件
+        String rangeString = request.getHeader("Range");
+        log.info("getVideo获取视频资源:{},读取文件字节:{}",fileUrl,rangeString);
+        try {
+            //获取响应的输出流
+            OutputStream outputStream = response.getOutputStream();
+            File file = new File(fileUrl);
+            if(file.exists()){
+                RandomAccessFile targetFile = new RandomAccessFile(file, "r");
+                long fileLength = targetFile.length();
+                //播放
+                if(rangeString != null){
+                    long range = Long.parseLong(rangeString.substring(rangeString.indexOf("=") + 1, rangeString.indexOf("-")));
+                    //设置内容类型
+                    response.setHeader("Content-Type", "video/mov");
+                    //设置此次相应返回的数据长度
+                    response.setHeader("Content-Length", String.valueOf(fileLength - range));
+                    //设置此次相应返回的数据范围
+                    response.setHeader("Content-Range", "bytes "+range+"-"+(fileLength-1)+"/"+fileLength);
+                    //返回码需要为206，而不是200
+                    response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                    //设定文件读取开始位置（以字节为单位）
+                    targetFile.seek(range);
+                }else {
+                    //下载
+                    //设置响应头，把文件名字设置好
+                    response.setHeader("Content-Disposition", "attachment; filename="+ URLEncoder.createAll().encode(fileName,StandardCharsets.UTF_8) );
+                    //设置文件长度
+                    response.setHeader("Content-Length", String.valueOf(fileLength));
+                    //解决编码问题
+                    response.setHeader("Content-Type","application/octet-stream");
+                }
+                byte[] cache = new byte[1024 * 300];
+                int flag;
+                while ((flag = targetFile.read(cache))!=-1){
+                    outputStream.write(cache, 0, flag);
+                }
+            }else {
+                String message = "file:"+fileName+" not exists";
+                //解决编码问题
+                response.setHeader("Content-Type","application/json");
+                outputStream.write(message.getBytes(StandardCharsets.UTF_8));
+            }
+            outputStream.flush();
+            outputStream.close();
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        }
+    }
 }

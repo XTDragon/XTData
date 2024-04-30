@@ -3,12 +3,15 @@ package com.xtdragon.xtdata.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.xtdragon.xtdata.common.CommonResult;
+import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.model.User;
 import com.xtdragon.xtdata.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user/")
@@ -33,6 +36,13 @@ public class UserController {
     @RequestMapping("isLogin")
     public String isLogin() {
         return "当前会话是否登录：" + StpUtil.isLogin();
+    }
+
+
+    @RequestMapping("/UserList")
+//    @SaCheckLogin
+    public CommonResult getUserList() {
+        return CommonResult.success(userService.list());
     }
 
 }

@@ -12,11 +12,15 @@ spring:
           username: ${DB_USERNAME:root}
           password: ${DB_PASSWORD:123456}
 
-#        Others:
-#          driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
-#          url: ${DB_URL:jdbc:mysql://localhost:3306/qhoa61?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&}
-#          username: ${DB_USERNAME:root}
-#          password: ${DB_PASSWORD:123456}
+xtdata:
+  file:
+    directory: ${file_directory:D://XTData}
+
+  #        Others:
+  #          driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+  #          url: ${DB_URL:jdbc:mysql://localhost:3306/qhoa61?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&}
+  #          username: ${DB_USERNAME:root}
+  #          password: ${DB_PASSWORD:123456}
   http:
     multipart:
       maxFileSize: 100Mb

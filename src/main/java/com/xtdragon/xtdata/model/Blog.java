@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Data
@@ -18,7 +19,7 @@ public class Blog {
 
     private String imgUrl;
 
-    private byte[]  imgFile;
+    private String  imgFile;
 
     private String title;
 
@@ -34,6 +35,8 @@ public class Blog {
 
     private String content;
 
+    private boolean enable;
+
     public Blog(String title, Date createTime, Date lastModifiedTime, int comments, int lookTimes, String content) {
         this.title = title;
         this.createTime = createTime;
@@ -43,13 +46,17 @@ public class Blog {
         this.content = content;
     }
 
-    public Blog(String imgUrl, String title, Date createTime, Date lastModifiedTime, int comments, int lookTimes, String content) {
-        this.imgUrl = imgUrl;
-        this.title = title;
-        this.createTime = createTime;
-        this.lastModifiedTime = lastModifiedTime;
-        this.comments = comments;
-        this.lookTimes = lookTimes;
-        this.content = content;
+    @Override
+    public String toString() {
+        return "Blog{" +
+                "id=" + id +
+                ", imgUrl='" + imgUrl + '\'' +
+                ", title='" + title + '\'' +
+                ", createTime=" + createTime +
+                ", lastModifiedTime=" + lastModifiedTime +
+                ", comments=" + comments +
+                ", lookTimes=" + lookTimes +
+                ", enable=" + enable +
+                '}';
     }
 }

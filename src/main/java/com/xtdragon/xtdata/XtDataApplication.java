@@ -8,7 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class XtDataApplication {
 
+
     public static void main(String[] args) {
+
+
         SpringApplication.run(XtDataApplication.class, args);
     }
 

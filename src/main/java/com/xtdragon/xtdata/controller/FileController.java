@@ -6,12 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.dao.BlogMapper;
 import com.xtdragon.xtdata.dao.GameFileMapper;
-import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.model.FCGameFile;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,9 +18,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Date;
-import java.util.Objects;
 
 @RestController
 //@RequestMapping(value = "api")
@@ -33,7 +26,7 @@ public class FileController {
     @Value("${filePath}")
     private String filePath;
 
-    final   RestTemplate restTemplate;
+    final RestTemplate restTemplate;
 
     final GameFileMapper gameFileMapper;
 
@@ -45,12 +38,10 @@ public class FileController {
         this.gameFileMapper = gameFileMapper;
     }
 
-
     @RequestMapping(value = "/downLoadFile/{id}")
     public void downLoadFile(HttpServletResponse response, @PathVariable("id") String id) throws IOException {
         System.out.println(id);
-//        id= URLEncoder.encode(id,"ISO-8859-1");
-
+//        id= URLEncoder.encode(id,"ISO-8859-1")
 //        QueryWrapper<FCGameFile> queryWrapper = new QueryWrapper();
         FCGameFile fcGameFile = gameFileMapper.selectById(id);
 
@@ -94,13 +85,11 @@ public class FileController {
         }
     }
 
-
     @RequestMapping(value = "/GameList", method = RequestMethod.GET)
     public CommonResult getGameList() {
         IPage<FCGameFile> gameIPage = gameFileMapper.selectPage(new Page<>(), null);
         return CommonResult.success(gameIPage.getRecords());
     }
-
 
     @RequestMapping(value = "/Search", method = RequestMethod.GET)
     public CommonResult SearchGame(String input) {
@@ -119,7 +108,6 @@ public class FileController {
         reFile(file);
         return;
     }
-
 
     public void reFile(File file) {
         FCGameFile game = new FCGameFile();
