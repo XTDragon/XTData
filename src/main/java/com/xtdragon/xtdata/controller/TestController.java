@@ -147,4 +147,23 @@ public class TestController {
         } catch (IOException e) {
         }
     }
+
+    File file=new File("C:\\Users\\gtja_1\\Desktop\\营销管理服务部");
+    @RequestMapping("/test")
+    public void test11() throws IOException {
+        System.out.println(file.getName());
+        test22(file,"营销管理服务部");
+    }
+
+    public void test22(File file,String url) throws IOException {
+
+        for (File listFile : file.listFiles()) {
+//            System.out.println(file.getName());
+            if (listFile.isDirectory()){
+                System.out.println(url+"-"+listFile.getName());
+                test22(listFile,url+"-"+ listFile.getName());
+            }
+        }
+    }
+
 }

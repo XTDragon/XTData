@@ -11,22 +11,20 @@ spring:
           url: ${DB_URL:jdbc:mysql://localhost:3306/tdata?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&}
           username: ${DB_USERNAME:root}
           password: ${DB_PASSWORD:123456}
+  servlet:
+    multipart:
+      max-file-size: 100MB
 
 xtdata:
   file:
-    directory: ${file_directory:D://XTData}
-
-  #        Others:
-  #          driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
-  #          url: ${DB_URL:jdbc:mysql://localhost:3306/qhoa61?useUnicode=true&allowPublicKeyRetrieval=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&}
-  #          username: ${DB_USERNAME:root}
-  #          password: ${DB_PASSWORD:123456}
+    directory: ${file_directory:D:\\XTData}
   http:
     multipart:
       maxFileSize: 100Mb
-      maxRequestSize: 100Mb
+#      maxRequestSize: 100Mb
     encoding:
       charset: utf-8
+
 
 #mybatis-plus
 #mybatis-plus.config-location=
