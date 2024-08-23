@@ -9,5 +9,4 @@ import com.baomidou.mybatisplus.extension.service.IService;
 * @createDate 2024-07-22 11:05:43
 */
 public interface TBaseFileService extends IService<TBaseFile> {
-
 }

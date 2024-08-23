@@ -13,14 +13,14 @@ spring:
           password: ${DB_PASSWORD:123456}
   servlet:
     multipart:
-      max-file-size: 100MB
+      enabled: true
+      max-file-size: 2GB
+      max-request-size: 500MB
+
 
 xtdata:
   file:
     directory: ${file_directory:D:\\XTData}
-  http:
-    multipart:
-      maxFileSize: 100Mb
 #      maxRequestSize: 100Mb
     encoding:
       charset: utf-8

@@ -2,8 +2,12 @@ package com.xtdragon.xtdata.controller.mediacontroller;
 
 import cn.hutool.core.net.URLEncoder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xtdragon.xtdata.common.CommonPage;
 import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.dao.BlogMapper;
+import com.xtdragon.xtdata.model.Blog;
+import com.xtdragon.xtdata.model.file.FileType;
 import com.xtdragon.xtdata.model.file.TBaseFile;
 import com.xtdragon.xtdata.service.TBaseFileService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -45,8 +52,7 @@ public class VideoController {
     }
 
 
-
-    @RequestMapping("/getVideo")
+    @RequestMapping("/test")
     public void getVideoByFileName(HttpServletRequest request, HttpServletResponse response, @RequestParam String fileName) {
         String fileUrl = fileDirectory + "\\video\\" + fileName;
         //String fileName="C:\\Users\\gtja_1\\Desktop\\少年派\\少年派·第六期2023年11月2日.mp4";
@@ -103,13 +109,10 @@ public class VideoController {
     }
 
 
-
     @RequestMapping("/get/{id}")
     public void getVideo(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
         TBaseFile byId = baseFileService.getById(id);
-        String fileName = byId.getFileName();
-        String fileUrl = fileDirectory + "\\video\\" + fileName;
-        //String fileName="C:\\Users\\gtja_1\\Desktop\\少年派\\少年派·第六期2023年11月2日.mp4";
+        String fileUrl = fileDirectory + byId.getFilePath();
         //视频资源存储信息
         FileInputStream fileInputStream = null;
         OutputStream outputStream = null;
@@ -159,7 +162,7 @@ public class VideoController {
                 // 将文件保存在服务器目录中
                 File targetFile = new File(fileUrl);
                 FileUtils.writeByteArrayToFile(targetFile, multipartFile.getBytes());
-                baseFileService.save(new TBaseFile(multipartFile, md5 ,"\\video\\" + fileName));
+                baseFileService.save(new TBaseFile(multipartFile, md5, "\\video\\" + fileName));
             }
         } catch (IOException e) {
             log.error("保存文件到服务器失败:" + fileName, e);
@@ -167,47 +170,17 @@ public class VideoController {
         return CommonResult.success();
     }
 
-    @RequestMapping("/list/video")
-    public void ListVideo(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
-        TBaseFile byId = baseFileService.getById(id);
-        String fileName = byId.getFileName();
-        String fileUrl = fileDirectory + "\\video\\" + fileName;
-        //String fileName="C:\\Users\\gtja_1\\Desktop\\少年派\\少年派·第六期2023年11月2日.mp4";
-        //视频资源存储信息
-        FileInputStream fileInputStream = null;
-        OutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            fileInputStream = new FileInputStream(fileUrl);
-            byte[] cache = new byte[1024];
-            response.setHeader(HttpHeaders.CONTENT_TYPE, "video/mp4");
-            response.setHeader("Accept-Ranges", "bytes");
-            response.setHeader(HttpHeaders.CONTENT_LENGTH, fileInputStream.available() + "");
-            int flag;
-            while ((flag = fileInputStream.read(cache)) != -1) {
-                outputStream.write(cache, 0, flag);
-            }
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
-            log.error("文件传输错误", e);
-            throw new RuntimeException("文件传输错误");
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    log.error("流释放错误", e);
-                }
-            }
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    log.error("文件流释放错误", e);
-                }
-            }
-        }
+    @RequestMapping("/page")
+    public CommonResult ListVideo(@RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                  @RequestParam(value = "currentPage", defaultValue = "1") Integer currentPage) {
+        List<String> collect = Arrays.stream(FileType.values())
+                .filter(i -> i.getPath().equals("video"))
+                .map(FileType::getType)
+                .collect(Collectors.toList());
+        CommonPage<TBaseFile> page= CommonPage.reset(
+                baseFileService.page(new Page<>(),
+                        new QueryWrapper<TBaseFile>().in("file_type", collect)));
+        return CommonResult.success(page);
     }
 
 }
