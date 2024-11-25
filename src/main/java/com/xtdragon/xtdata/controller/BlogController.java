@@ -114,7 +114,6 @@ public class BlogController {
                         br.close();
                         String fileName = file.getName();
                         Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
-
                         blogMapper.update(newblog, new QueryWrapper<Blog>().eq("id", blog.getId()));
                     }
                 } else {

@@ -6,10 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xtdragon.xtdata.common.CommonPage;
 import com.xtdragon.xtdata.common.CommonResult;
 import com.xtdragon.xtdata.dao.BlogMapper;
-import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.model.file.FileType;
 import com.xtdragon.xtdata.model.file.TBaseFile;
 import com.xtdragon.xtdata.service.TBaseFileService;
+import com.xtdragon.xtdata.utils.MinioUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -39,13 +39,17 @@ public class VideoController {
     @Value("${xtdata.file.directory}")
     String fileDirectory;
 
+
+    final MinioUtil minioUtil;
+
     final RestTemplate restTemplate;
 
     final BlogMapper blogMapper;
 
     final TBaseFileService baseFileService;
 
-    public VideoController(RestTemplate restTemplate, BlogMapper blogMapper, TBaseFileService baseFileService) {
+    public VideoController(MinioUtil minioUtil, RestTemplate restTemplate, BlogMapper blogMapper, TBaseFileService baseFileService) {
+        this.minioUtil = minioUtil;
         this.restTemplate = restTemplate;
         this.blogMapper = blogMapper;
         this.baseFileService = baseFileService;
@@ -110,13 +114,14 @@ public class VideoController {
 
 
     @RequestMapping("/get/{id}")
-    public void getVideo(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) {
+    public void getVideo(HttpServletResponse response, @PathVariable("id") String id) {
         TBaseFile byId = baseFileService.getById(id);
         String fileUrl = fileDirectory + byId.getFilePath();
         //视频资源存储信息
         FileInputStream fileInputStream = null;
         OutputStream outputStream = null;
         try {
+            minioUtil.download(response,byId.getFileName());
             outputStream = response.getOutputStream();
             fileInputStream = new FileInputStream(fileUrl);
             byte[] cache = new byte[1024];
@@ -182,5 +187,4 @@ public class VideoController {
                         new QueryWrapper<TBaseFile>().in("file_type", collect)));
         return CommonResult.success(page);
     }
-
 }

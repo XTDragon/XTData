@@ -25,6 +25,11 @@ xtdata:
     encoding:
       charset: utf-8
 
+minio:
+  endpoint: http://localhost:9000
+  access-key: ss3BVE91epNcNzdoWusS
+  secret-key: y4zdzvn6ZYCCDnDNQvyq6q5eFd4MprVxEBAXX9aT
+  bucket-name: xtdata
 
 #mybatis-plus
 #mybatis-plus.config-location=
@@ -33,7 +38,7 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
-filePath: src\\main\\resources
+#filePath: src\\main\\resources
 #filePath=//usr//games//fcTest
 
 ############## Sa-Token 配置 (文档: https://sa-token.cc) ##############

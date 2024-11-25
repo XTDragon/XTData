@@ -29,7 +29,7 @@ import java.util.Objects;
 @Slf4j
 public class FileController {
 
-    @Value("${filePath}")
+    @Value("${xtdata.file.directory}")
     private String filePath;
 
     @Value("${xtdata.file.directory}")
