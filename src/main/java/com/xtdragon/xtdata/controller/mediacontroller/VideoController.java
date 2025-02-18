@@ -1,11 +1,10 @@
 package com.xtdragon.xtdata.controller.mediacontroller;
 
-import cn.hutool.core.net.URLEncoder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xtdragon.xtdata.common.CommonPage;
 import com.xtdragon.xtdata.common.CommonResult;
-import com.xtdragon.xtdata.dao.BlogMapper;
+import com.xtdragon.xtdata.mapper.BlogMapper;
 import com.xtdragon.xtdata.model.file.FileType;
 import com.xtdragon.xtdata.model.file.TBaseFile;
 import com.xtdragon.xtdata.service.TBaseFileService;
@@ -22,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -54,64 +54,6 @@ public class VideoController {
         this.blogMapper = blogMapper;
         this.baseFileService = baseFileService;
     }
-
-
-    @RequestMapping("/test")
-    public void getVideoByFileName(HttpServletRequest request, HttpServletResponse response, @RequestParam String fileName) {
-        String fileUrl = fileDirectory + "\\video\\" + fileName;
-        //String fileName="C:\\Users\\gtja_1\\Desktop\\少年派\\少年派·第六期2023年11月2日.mp4";
-        //视频资源存储信息
-        response.reset();
-        //获取从那个字节开始读取文件
-        String rangeString = request.getHeader("Range");
-        log.info("获取视频资源:{},读取文件字节:{}", fileUrl, rangeString);
-        try {
-            //获取响应的输出流
-            OutputStream outputStream = response.getOutputStream();
-            File file = new File(fileUrl);
-            if (file.exists()) {
-                RandomAccessFile targetFile = new RandomAccessFile(file, "r");
-                long fileLength = targetFile.length();
-                //播放
-                if (rangeString != null) {
-                    long range = Long.parseLong(rangeString.substring(rangeString.indexOf("=") + 1, rangeString.indexOf("-")));
-                    //设置内容类型
-                    response.setHeader("Content-Type", "video/mov");
-                    //设置此次相应返回的数据长度
-                    response.setHeader("Content-Length", String.valueOf(fileLength - range));
-                    //设置此次相应返回的数据范围
-                    response.setHeader("Content-Range", "bytes " + range + "-" + (fileLength - 1) + "/" + fileLength);
-                    //返回码需要为206，而不是200
-                    response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                    //设定文件读取开始位置（以字节为单位）
-                    targetFile.seek(range);
-                } else {
-                    //下载
-                    //设置响应头，把文件名字设置好
-                    response.setHeader("Content-Disposition", "attachment; filename=" + URLEncoder.createAll().encode(fileName, StandardCharsets.UTF_8));
-                    //设置文件长度
-                    response.setHeader("Content-Length", String.valueOf(fileLength));
-                    //解决编码问题
-                    response.setHeader("Content-Type", "application/octet-stream");
-                }
-                byte[] cache = new byte[1024 * 300];
-                int flag;
-                while ((flag = targetFile.read(cache)) != -1) {
-                    outputStream.write(cache, 0, flag);
-                }
-            } else {
-                String message = "file:" + fileName + " not exists";
-                //解决编码问题
-                response.setHeader("Content-Type", "application/json");
-                outputStream.write(message.getBytes(StandardCharsets.UTF_8));
-            }
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException e) {
-            log.info("获取视频资源出错:{},", fileUrl);
-        }
-    }
-
 
     @RequestMapping("/get/{id}")
     public void getVideo(HttpServletResponse response, @PathVariable("id") String id) {
@@ -160,6 +102,7 @@ public class VideoController {
         // 文件存储目录
         String fileUrl = fileDirectory + "\\video\\" + fileName;
         try {
+            minioUtil.upload(multipartFile);
             // 获取上传文件的MD5值
             String md5 = DigestUtils.md5Hex(multipartFile.getBytes());
             TBaseFile targetFileMD5 = baseFileService.getOne(new QueryWrapper<TBaseFile>().eq("md5", md5));

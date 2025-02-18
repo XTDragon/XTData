@@ -3,7 +3,7 @@ package com.xtdragon.xtdata.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xtdragon.xtdata.model.file.TBaseFile;
 import com.xtdragon.xtdata.service.TBaseFileService;
-import com.xtdragon.xtdata.dao.TBaseFileMapper;
+import com.xtdragon.xtdata.mapper.TBaseFileMapper;
 import org.springframework.stereotype.Service;
 
 /**

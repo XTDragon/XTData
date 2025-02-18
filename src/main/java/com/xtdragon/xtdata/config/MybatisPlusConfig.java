@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Alexander
  */
 @Configuration
-@MapperScan("com.xtdragon.xtdata.dao")
+@MapperScan("com.xtdragon.xtdata.mapper")
 public class MybatisPlusConfig {
 
     @Bean

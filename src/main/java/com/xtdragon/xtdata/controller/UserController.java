@@ -25,7 +25,8 @@ public class UserController {
     public CommonResult doLogin(@RequestBody User user) {
         // 此处仅作模拟示例，真实项目需要从数据库中查询数据进行比对
         User data = userService.getOne(new QueryWrapper<User>().eq("username", user.getUsername()));
-        if (data != null && user.getUsername().equals(data.getUsername()) && user.getPassword().equals(data.getPassword())) {
+        if (data != null && user.getUsername().equals(data.getUsername())
+                && user.getPassword().equals(data.getPassword())) {
             StpUtil.login(user.getUsername());
             return CommonResult.success(user, "登录成功");
         }

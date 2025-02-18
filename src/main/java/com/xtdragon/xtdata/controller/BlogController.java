@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xtdragon.xtdata.common.CommonPage;
 import com.xtdragon.xtdata.common.CommonResult;
-import com.xtdragon.xtdata.dao.BlogMapper;
+import com.xtdragon.xtdata.mapper.BlogMapper;
 import com.xtdragon.xtdata.model.Blog;
 import com.xtdragon.xtdata.service.BlogService;
 import lombok.extern.slf4j.Slf4j;
@@ -74,13 +74,6 @@ public class BlogController {
         return CommonResult.success(blogService.updateById(blog));
     }
 
-//    @RequestMapping("/get/Img/{id}")
-////    @SaCheckLogin
-//    public byte[] getBlogImg(@PathVariable String id) {
-//        return blogService.getById(id).getImgFile();
-//    }
-
-
     @RequestMapping("/blog/{id}")
     public CommonResult getBlogById(@PathVariable String id) {
 //        System.out.println(blogService.list());
@@ -129,7 +122,7 @@ public class BlogController {
                         result.append(System.lineSeparator()).append(string);
                     }
                     br.close();
-                    ResponseEntity<String> response = restTemplate.exchange("https://moey.cn/wallpaper/?type=josn&form=level", HttpMethod.GET, null, String.class);
+                    ResponseEntity<String> response = restTemplate.exchange("https://moey.cn/pic/?type=josn&form=level", HttpMethod.GET, null, String.class);
                     String fileName = file.getName();
                     Blog newblog = new Blog(fileName.substring(0, fileName.lastIndexOf(".")), creationTime, lastModifiedTime, 0, 0, result.toString());
                     newblog.setImgUrl(response.getBody());
@@ -138,9 +131,10 @@ public class BlogController {
 //                    int read = imgFile.getBody().getInputStream().read();
                     String base64TypeImg = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imgFile.getBody().getInputStream().readAllBytes());
                     newblog.setImgFile(base64TypeImg);
+                    newblog.setEnable(true);
 //                  System.out.println(response);
                     blogMapper.insert(newblog);
-                    log.info("有blog新增：" + newblog);
+                    log.info("有blog新增：" + newblog.getTitle());
                 }
             }
         } catch (Exception e) {

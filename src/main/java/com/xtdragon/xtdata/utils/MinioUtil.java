@@ -71,7 +71,6 @@ public class MinioUtil {
                             .bucket(minioConfig.getBucketName())
                             .object(file.getOriginalFilename())
                             .stream(inputStream, inputStream.available(), -1)
-                            .contentType(file.getContentType())
                             .build()
             );
             log.info("文件上传成功bucket:{},OriginalFilename:{}", minioConfig.getBucketName(), file.getOriginalFilename());

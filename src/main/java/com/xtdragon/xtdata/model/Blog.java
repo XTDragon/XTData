@@ -45,18 +45,4 @@ public class Blog {
         this.lookTimes = lookTimes;
         this.content = content;
     }
-
-    @Override
-    public String toString() {
-        return "Blog{" +
-                "id=" + id +
-                ", imgUrl='" + imgUrl + '\'' +
-                ", title='" + title + '\'' +
-                ", createTime=" + createTime +
-                ", lastModifiedTime=" + lastModifiedTime +
-                ", comments=" + comments +
-                ", lookTimes=" + lookTimes +
-                ", enable=" + enable +
-                '}';
-    }
 }

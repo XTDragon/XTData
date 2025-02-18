@@ -1,4 +1,4 @@
-package com.xtdragon.xtdata.dao;
+package com.xtdragon.xtdata.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
